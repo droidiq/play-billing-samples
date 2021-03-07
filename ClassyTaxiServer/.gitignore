@@ -61,6 +61,7 @@ typings/
 .next
 
 **/.firebaserc
+.firebase/
 service-account*.json
 
 typings
@@ -69,5 +70,5 @@ web/app/**/*.map
 jspm_packages
 
 *.code-workspace
-server/lib/
+lib/
 

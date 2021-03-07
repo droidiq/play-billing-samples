@@ -101,12 +101,12 @@ This sample application uses Firebase (Auth, Notifications, Firestore).
 
     * [https://console.firebase.google.com/](https://console.firebase.google.com/)
 
-1. In the project, go to Develop > Database > Cloud Firestore > Get started > Start in locked mode
+1. In the project, go to Build > Cloud Firestore > Create database > Start in **production mode**
 
-    * Wait for Firestore to be enabled for the project
+1. In the project, go to Build > Functions> Get started. Enable Functions.
 
-1. In the project, go to Develop > Authentication > Sign-in Method. Enable Email/Password and Google
- as sign-in providers
+1. In the project, go to Build > Authentication > Get started > Sign-in method. Enable **Email/Password** and **Google**
+ as Sign-in providers
 
 1. Add your Android app to the project
 
@@ -169,7 +169,7 @@ step now, and rebuild with the updated `google-services.json`
 
 1. Create an application in the Google Play Developer Console
 
-    * [https://play.google.com/apps/publish](https://play.google.com/apps/publish)
+    * [https://play.google.com/console](https://play.google.com/console)
 
 1. Upload and publish the release APK to the Internal Test, Alpha, Beta, or Production channel
 
@@ -179,8 +179,7 @@ step now, and rebuild with the updated `google-services.json`
 
     * [https://support.google.com/googleplay/android-developer/answer/140504](https://support.google.com/googleplay/android-developer/answer/140504)
 
-    * If you use different values than the defaults in the Android app `Constants.kt`, update the
-    Android app with the matching values
+    * The Android app `Constants.kt` contains 2 SKUs: `"basic_subscription"` and `"premium_subscription"`.
 
     * Write down your product IDs (SKUs) so you can configure your backend server
 
@@ -201,7 +200,13 @@ step now, and rebuild with the updated `google-services.json`
 
         *  `{project_folder}/ClassyTaxiServer/src/service-account.json`
 
-1. Optional: Create a license test account to [test subscriptions quickly](https://android-developers.googleblog.com/2018/01/faster-renewals-for-test-subscriptions.html) without spending money
+    * Provide the necessary **Account permission** to the service account email address [https://play.google.com/console/developers/users-and-permissions](https://play.google.com/console/developers/users-and-permissions)
+
+        * **View financial data, orders, and cancellation survey responses**
+
+        * **Manage orders and subscriptions**
+
+1. Recommended: Create a license test account to [test subscriptions quickly](https://android-developers.googleblog.com/2018/01/faster-renewals-for-test-subscriptions.html) without spending money
 
     * [https://developer.android.com/google/play/billing/billing_testing.html#test-purchases-sandbox](https://developer.android.com/google/play/billing/billing_testing.html#test-purchases-sandbox)
 
@@ -218,41 +223,26 @@ PubSub
 
         * `google-play-developer-notifications@system.gserviceaccount.com`
 
-    * Grant the Role **Pub/Sub Publisher** to the Google Play service account
+    * In the Permissions section, select **Add Member** and grant the Role **Pub/Sub Publisher** to the Google Play service account
 
         * Note: Make sure to set the role as **Publisher** so that Google Play can publish updates
         to your project
 
+    * Copy the **Topic name** so that you can add it to the Google Play Console
+
 1. Configure the Google Play Console to allow your backend to receive notifications from Play Store
  for subscription purchase changes
 
-    * [https://developer.android.com/google/play/billing/realtime_developer_notifications#updating_the_google_play_console](https://developer.android.com/google/play/billing/realtime_developer_notifications#updating_the_google_play_console)
+    * [https://developer.android.com/google/play/billing/getting-ready#enable-rtdn](https://developer.android.com/google/play/billing/getting-ready#enable-rtdn)
 
-    * Your real-time developer notifications topic should be in this format
+    * Your real-time developer notifications **Topic name** should be in this format
 
         *  `projects/{your_firebase_project_id}/topics/play-subs`
 
 # Deploy Backend Server
 
-These are steps to build the backend server code located [here](https://github.com/android/play-billing-samples/tree/master/ClassyTaxiServer)
-
-1. Make sure you have installed Node.js, npm, and Firebase CLI
-
-    * [https://firebase.google.com/docs/cli/](https://firebase.google.com/docs/cli/)
-
-1. Run `npm install` to install dependencies
-
-1. Configure Cloud Functions for Firebase with your Android app and subscription products
-
-        firebase use --add {your_firebase_project_id}
-
-        firebase functions:config:set app.package_name="your_android_application_id"
-
-        firebase functions:config:set app.basic_plan_sku="your_basic_subscription_product_sku_id"
-
-        firebase functions:config:set app.premium_plan_sku="your_premium_subscription_product_sku_id"
-
-1. Run `firebase deploy` to deploy your backend to Cloud Functions for Firebase
+Follow the steps to deploy the backend server here:
+[here](https://github.com/android/play-billing-samples/tree/master/ClassyTaxiServer).
 
 # Troubleshoot common issues
 
@@ -262,6 +252,20 @@ Functions log.
 
   * A: You can safely ignore the warning and stay use the Firebase Spark Plan because the sample
   only accesses the Google network.
+
+* Q: The logs on your server show an error: "*Unexpected error when querying Google Play Developer API. Please check if you use a correct service account*".
+
+  * A: Check that the `service-account.json` that you deployed to your server
+    matches the service account email that is registered in the
+    Google Play Console
+    [https://play.google.com/console/u/0/developers/api-access](https://play.google.com/console/u/0/developers/api-access).
+
+* Q: "*The current user has insufficient permissions to perform the requested operation.*"
+
+  * A: Check that the the service account email that is registered in the
+    Google Play Console has the necessary **Account permission** [https://play.google.com/console/developers/users-and-permissions](https://play.google.com/console/developers/users-and-permissions)
+      * **View financial data, orders, and cancellation survey responses**
+      * **Manage orders and subscriptions**
 
 * Q: Android build: `Execution failed for task :app:processDebugGoogleServices. File
 google-services.json is missing. The Google Services Plugin cannot function without it`.

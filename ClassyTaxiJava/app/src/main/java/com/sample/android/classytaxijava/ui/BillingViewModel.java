@@ -96,14 +96,12 @@ public class BillingViewModel extends AndroidViewModel {
     }
 
     /**
-     * Open account hold subscription.
+     * Open the subscription page on Google Play.
      * <p>
-     * We need to use the server data to understand account hold.
-     * Most of the other deeplinks are based on the purchase tokens returned on the local device.
-     * Since the purchase tokens will not be returned when the subscription is in account hold,
-     * we look at the server data to determine the deeplink.
+     * Since the purchase tokens will not be returned during account hold or pause,
+     * we use the server data to determine the deeplink to Google Play.
      */
-    public void openAccountHoldSubscription() {
+    public void openSubscriptionPageOnGooglePlay() {
         boolean isPremiumOnServer = BillingUtilities
                 .serverHasSubscription(subscriptions.getValue(), Constants.PREMIUM_SKU);
         boolean isBasicOnServer = BillingUtilities
@@ -255,7 +253,7 @@ public class BillingViewModel extends AndroidViewModel {
             // Only set the old SKU parameter if the old SKU is already owned.
             if (oldSkuToBeReplaced != null && !oldSkuToBeReplaced.equals(sku)) {
                 Purchase oldPurchase = BillingUtilities
-                        .getPurchaseForSku(purchases.getValue(), sku);
+                        .getPurchaseForSku(purchases.getValue(), oldSkuToBeReplaced);
                 billingBuilder.setOldSku(oldSkuToBeReplaced, oldPurchase.getPurchaseToken());
             }
 

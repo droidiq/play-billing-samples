@@ -116,6 +116,8 @@ public class SubscriptionBindingAdapter {
         View gracePeriodMsg = view.findViewById(R.id.home_grace_period_message);
         View transferMsg = view.findViewById(R.id.home_transfer_message);
         View accountHoldMsg = view.findViewById(R.id.home_account_hold_message);
+        View accountPausedMsg = view.findViewById(R.id.home_account_paused_message);
+        TextView accountPausedMsgTxt = view.findViewById(R.id.home_account_paused_message_text);
         View basicMsg = view.findViewById(R.id.home_basic_message);
 
         // Set visibility assuming no subscription is available.
@@ -129,6 +131,7 @@ public class SubscriptionBindingAdapter {
         gracePeriodMsg.setVisibility(View.GONE);
         transferMsg.setVisibility(View.GONE);
         accountHoldMsg.setVisibility(View.GONE);
+        accountPausedMsg.setVisibility(View.GONE);
         basicMsg.setVisibility(View.GONE);
         // Update based on subscription information.
         if (subscriptions != null) {
@@ -136,16 +139,14 @@ public class SubscriptionBindingAdapter {
                 if (BillingUtilities.isSubscriptionRestore(subscription)) {
                     Log.d(TAG, "restore VISIBLE");
                     restoreMsg.setVisibility(View.VISIBLE);
-                    String expiryDate = getHumanReadableExpiryDate(subscription);
+                    String expiryDate = getHumanReadableDate(subscription.activeUntilMillisec);
                     restoreMsg.setText(view.getResources()
                             .getString(R.string.restore_message_with_date, expiryDate));
-
                     paywallMsg.setVisibility(View.GONE); // Paywall gone.
                 }
                 if (BillingUtilities.isGracePeriod(subscription)) {
                     Log.d(TAG, "grace period VISIBLE");
                     gracePeriodMsg.setVisibility(View.VISIBLE);
-                    ;
                     paywallMsg.setVisibility(View.GONE); // Paywall gone.
                 }
                 if (BillingUtilities.isTransferRequired(subscription)
@@ -157,6 +158,15 @@ public class SubscriptionBindingAdapter {
                 if (BillingUtilities.isAccountHold(subscription)) {
                     Log.d(TAG, "account hold VISIBLE");
                     accountHoldMsg.setVisibility(View.VISIBLE);
+                    paywallMsg.setVisibility(View.GONE); // Paywall gone.
+                }
+                if (BillingUtilities.isPaused(subscription)) {
+                    Log.d(TAG, "account paused VISIBLE");
+                    String autoResumeDate = getHumanReadableDate(subscription.autoResumeTimeMillis);
+                    String text = view.getResources()
+                            .getString(R.string.account_paused_message_string, autoResumeDate);
+                    accountPausedMsgTxt.setText(text);
+                    accountPausedMsg.setVisibility(View.VISIBLE);
                     paywallMsg.setVisibility(View.GONE); // Paywall gone.
                 }
                 if (BillingUtilities.isBasicContent(subscription)
@@ -182,6 +192,8 @@ public class SubscriptionBindingAdapter {
         View gracePeriodMsg = view.findViewById(R.id.premium_grace_period_message);
         View transferMsg = view.findViewById(R.id.premium_transfer_message);
         View accountHoldMsg = view.findViewById(R.id.premium_account_hold_message);
+        View accountPausedMsg = view.findViewById(R.id.premium_account_paused_message);
+        TextView accountPausedMsgTxt = view.findViewById(R.id.premium_account_paused_message_text);
         View premiumContent = view.findViewById(R.id.premium_premium_content);
         View upgradeMsg = view.findViewById(R.id.premium_upgrade_message);
 
@@ -195,6 +207,7 @@ public class SubscriptionBindingAdapter {
         gracePeriodMsg.setVisibility(View.GONE);
         transferMsg.setVisibility(View.GONE);
         accountHoldMsg.setVisibility(View.GONE);
+        accountPausedMsg.setVisibility(View.GONE);
         premiumContent.setVisibility(View.GONE);
         upgradeMsg.setVisibility(View.GONE);
 
@@ -208,7 +221,7 @@ public class SubscriptionBindingAdapter {
                 if (BillingUtilities.isSubscriptionRestore(subscription)) {
                     Log.d(TAG, "restore VISIBLE");
                     restoreMsg.setVisibility(View.VISIBLE);
-                    String expiryDate = getHumanReadableExpiryDate(subscription);
+                    String expiryDate = getHumanReadableDate(subscription.activeUntilMillisec);
                     restoreMsg.setText(view.getResources()
                             .getString(R.string.restore_message_with_date, expiryDate));
                     paywallMsg.setVisibility(View.GONE); // Paywall gone.
@@ -229,7 +242,15 @@ public class SubscriptionBindingAdapter {
                     accountHoldMsg.setVisibility(View.VISIBLE);
                     paywallMsg.setVisibility(View.GONE); // Paywall gone.
                 }
-
+                if (BillingUtilities.isPaused(subscription)) {
+                    Log.d(TAG, "account paused VISIBLE");
+                    String autoResumeDate = getHumanReadableDate(subscription.autoResumeTimeMillis);
+                    String text = view.getResources()
+                            .getString(R.string.account_paused_message_string, autoResumeDate);
+                    accountPausedMsgTxt.setText(text);
+                    accountPausedMsg.setVisibility(View.VISIBLE);
+                    paywallMsg.setVisibility(View.GONE); // Paywall gone.
+                }
                 // The upgrade message must be shown if there is a basic subscription
                 // and there are zero premium subscriptions. We need to keep track of the premium
                 // subscriptions and hide the upgrade message if we find any.
@@ -320,17 +341,16 @@ public class SubscriptionBindingAdapter {
     }
 
     /**
-     * Get a readable expiry date from a subscription.
+     * Get a readable date from the time in milliseconds.
      */
-    private static String getHumanReadableExpiryDate(SubscriptionStatus subscription) {
-        Long milliSeconds = subscription.activeUntilMillisec;
+    private static String getHumanReadableDate(long milliSeconds) {
         DateFormat formatter = SimpleDateFormat.getDateInstance();
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(milliSeconds);
         if (milliSeconds == 0L) {
-            Log.d(TAG, "Suspicious time: 0 milliseconds. JSON: " + subscription.toString());
+            Log.d(TAG, "Suspicious time: 0 milliseconds.");
         } else {
-            Log.d(TAG, "Expiry time millis: " + subscription.activeUntilMillisec);
+            Log.d(TAG, "Milliseconds: " + milliSeconds);
         }
         return formatter.format(calendar.getTime());
     }

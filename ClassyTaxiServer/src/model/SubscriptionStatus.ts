@@ -29,6 +29,8 @@ export class SubscriptionStatus {
   isFreeTrial: boolean;
   isGracePeriod: boolean;
   isAccountHold: boolean;
+  isPaused: boolean;
+  autoResumeTimeMillis: number;
 
   constructor(subcriptionPurchase: PlayBilling.SubscriptionPurchase) {
     this.sku = subcriptionPurchase.sku;
@@ -39,5 +41,7 @@ export class SubscriptionStatus {
     this.isFreeTrial = subcriptionPurchase.isFreeTrial();
     this.isGracePeriod = subcriptionPurchase.isGracePeriod();
     this.isAccountHold = subcriptionPurchase.isAccountHold();
+    this.isPaused = subcriptionPurchase.isPaused();
+    this.autoResumeTimeMillis = subcriptionPurchase.autoResumeTimeMillis;
   }
 }
